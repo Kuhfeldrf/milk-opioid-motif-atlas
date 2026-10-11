@@ -1,0 +1,289 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Milk Opioid Motif Atlas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600;700&display=swap">
+<style>
+/* Layout: stacked protein tracks (position maps) over a filterable site table. */
+:root{
+  --paper:#f5f7f9; --panel:#ffffff; --line:#d9dfe6; --line-soft:#e8edf2;
+  --ink:#14181d; --ink-2:#4d5864; --ink-3:#77838f;
+  --cas:#2a78d6;  /* casomorphin-like */
+  --enk:#eb6834;  /* enkephalin-like */
+  --weak:#1baf7a; /* weaker aromatic-5/6 motif */
+  --null:#9aa6b2; /* no second aromatic */
+  --known:#14181d;
+  --f-display:"IBM Plex Serif",Georgia,serif;
+  --f-body:"IBM Plex Sans",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#101317; --panel:#171b21; --line:#2b323b; --line-soft:#232931;
+  --ink:#eef2f6; --ink-2:#a9b4c0; --ink-3:#7c8794;
+  --cas:#3987e5; --enk:#d95926; --weak:#199e70; --null:#6b7580; --known:#eef2f6;
+  color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --paper:#101317; --panel:#171b21; --line:#2b323b; --line-soft:#232931;
+  --ink:#eef2f6; --ink-2:#a9b4c0; --ink-3:#7c8794;
+  --cas:#3987e5; --enk:#d95926; --weak:#199e70; --null:#6b7580; --known:#eef2f6;
+  color-scheme:dark;}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);
+  font-size:15px;line-height:1.55;margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding-block:40px 64px;padding-left:20px;padding-right:20px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(28px,4.4vw,42px);
+  line-height:1.1;margin:0 0 10px;text-wrap:balance;letter-spacing:-.015em}
+.sub{color:var(--ink-2);max-width:66ch;margin:0 0 6px;font-size:16px}
+.meta{color:var(--ink-3);font-size:13px;margin:14px 0 0}
+.eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 14px}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:3px;
+  margin:32px 0;overflow:hidden}
+.stat{background:var(--panel);padding:16px 18px;min-width:0}
+.stat b{display:block;font-family:var(--f-display);font-size:30px;font-weight:700;
+  line-height:1;font-variant-numeric:tabular-nums}
+.stat span{display:block;color:var(--ink-2);font-size:12.5px;margin-top:7px;line-height:1.4}
+
+h2{font-family:var(--f-display);font-size:21px;font-weight:600;margin:48px 0 6px;
+  letter-spacing:-.01em}
+h2:first-of-type{margin-top:40px}
+.note{color:var(--ink-2);font-size:14px;margin:0 0 20px;max-width:70ch}
+
+.legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin:0 0 22px;font-size:13px;
+  color:var(--ink-2);align-items:center}
+.key{display:inline-flex;align-items:center;gap:7px}
+.sw{width:11px;height:11px;border-radius:2px;flex:none}
+.sw.ring{border-radius:50%;box-shadow:0 0 0 2px var(--panel),0 0 0 3.5px var(--known)}
+
+.tracks{display:flex;flex-direction:column;gap:2px;background:var(--line);
+  border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.track{background:var(--panel);padding:14px 18px 8px;min-width:0}
+.thead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+  flex-wrap:wrap;margin-bottom:2px}
+.tname{font-weight:600;font-size:14px}
+.tname em{font-style:normal;color:var(--ink-3);font-weight:400}
+.tacc{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3)}
+svg{display:block;width:100%;height:auto;overflow:visible}
+.stem{stroke-width:2;stroke-linecap:round}
+.dot{stroke:var(--panel);stroke-width:2}
+.axis{stroke:var(--line);stroke-width:1}
+.tick{font-family:var(--f-mono);font-size:9px;fill:var(--ink-3)}
+.lbl{font-family:var(--f-mono);font-size:9.5px;fill:var(--ink-2)}
+.lbl.k{fill:var(--ink);font-weight:600}
+.hit{cursor:pointer}
+.hit:hover .dot{stroke-width:3}
+
+#tip{position:fixed;z-index:9;pointer-events:none;opacity:0;transition:opacity .1s;
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:9px 11px;font-size:12.5px;box-shadow:0 5px 18px rgba(0,0,0,.14);max-width:250px}
+#tip b{font-family:var(--f-mono);font-size:13px;display:block;margin-bottom:4px}
+#tip i{font-style:normal;color:var(--ink-2);display:block;font-size:11.5px}
+
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 14px;align-items:center}
+select,input[type=search]{font-family:var(--f-body);font-size:13px;padding:6px 9px;
+  border:1px solid var(--line);border-radius:3px;background:var(--panel);color:var(--ink)}
+label{font-size:12px;color:var(--ink-3);display:inline-flex;gap:6px;align-items:center}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:720px}
+th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line-soft);
+  white-space:nowrap}
+th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);
+  font-weight:600;position:sticky;top:0;background:var(--panel);cursor:pointer;
+  border-bottom:1px solid var(--line)}
+th:hover{color:var(--ink)}
+tbody tr:last-child td{border-bottom:0}
+td.seq{font-family:var(--f-mono);font-size:12.5px}
+td.num{font-variant-numeric:tabular-nums;text-align:right}
+.pill{display:inline-block;padding:1px 7px;border-radius:9px;font-size:11px;
+  border:1px solid currentColor;line-height:1.5}
+.p-cas{color:var(--cas)} .p-enk{color:var(--enk)} .p-weak{color:var(--weak)}
+.p-none{color:var(--null)}
+.tag{font-size:11px;color:var(--ink-3)}
+.tag.hit{color:var(--ink);font-weight:600;cursor:default}
+footer{margin-top:52px;padding-top:18px;border-top:1px solid var(--line);
+  color:var(--ink-3);font-size:12.5px}
+footer p{margin:0 0 7px;max-width:76ch}
+code{font-family:var(--f-mono);font-size:.92em}
+@media (max-width:560px){.track{padding:12px 12px 6px}}
+</style>
+
+<div class="wrap">
+<p class="eyebrow">Sequence scan &middot; human and bovine milk peptidomics</p>
+<h1>Where milk proteins can release opioid peptides</h1>
+<p class="sub">Every tyrosine in the mature chain of five milk proteins, scored for the
+opioid pharmacophore that met-enkephalin (YGGFM) and &beta;-casomorphin-7 (YPFPGPI) share,
+then checked against 14,572 peptides measured in human and bovine milk digesta.</p>
+<p class="meta">Sequences from UniProt &middot; peptides from <code>combine data sets simplifed.xlsx</code>
+(Abbott set plus preterm gastric, preterm intestinal and term intestinal sheets)</p>
+
+<div class="stats">
+  <div class="stat"><b>86</b><span>Tyr sites in mature human &amp; cow chains</span></div>
+  <div class="stat"><b>39</b><span>carry an opioid-like motif</span></div>
+  <div class="stat"><b>11</b><span>released as a peptide N-terminus</span></div>
+  <div class="stat"><b>5</b><span>released but undocumented</span></div>
+</div>
+
+<h2>Position maps</h2>
+<p class="note">One track per protein. Each stem marks a tyrosine at its mature-chain position;
+stem height counts the experimental peptides whose <em>N-terminus</em> falls exactly there,
+which is what opioid activity requires. A ring marks a documented opioid. Hover any point.</p>
+<div class="legend">
+  <span class="key"><i class="sw" style="background:var(--cas)"></i>Casomorphin-like (YP&middot;aromatic)</span>
+  <span class="key"><i class="sw" style="background:var(--enk)"></i>Enkephalin-like (YG/L/A&middot;aromatic)</span>
+  <span class="key"><i class="sw" style="background:var(--weak)"></i>Weaker &mdash; aromatic at 5&ndash;6</span>
+  <span class="key"><i class="sw" style="background:var(--null)"></i>No second aromatic</span>
+  <span class="key"><i class="sw ring" style="background:var(--cas)"></i>Documented opioid</span>
+</div>
+<div class="tracks" id="tracks"></div>
+
+<h2>All tyrosine sites</h2>
+<p class="note">Sortable. <em>Peptides starting here</em> is the experimental evidence that this
+exact N-terminus is produced by digestion; <em>4&ndash;8mer</em> counts those short enough to act
+as an opioid without further trimming.</p>
+<div class="controls">
+  <label>Protein <select id="fProt"></select></label>
+  <label>Species <select id="fSp"></select></label>
+  <label>Motif <select id="fCls"></select></label>
+  <label><input type="checkbox" id="fRel"> Released only</label>
+  <label><input type="checkbox" id="fNov"> Undocumented only</label>
+</div>
+<div class="scroll"><table id="tbl"><thead><tr>
+<th data-k="species">Species</th><th data-k="protein">Protein</th>
+<th data-k="pos" class="num">Position</th><th data-k="win">Window</th>
+<th data-k="cls">Motif</th><th data-k="enk" class="num">Enk score</th>
+<th data-k="n" class="num">Peptides starting here</th>
+<th data-k="short" class="num">4&ndash;8mer</th><th data-k="known">Documented</th>
+</tr></thead><tbody></tbody></table></div>
+
+<footer>
+<p><b>Motif model.</b> A candidate is a tyrosine in the mature chain that could start a
+4&ndash;8 residue peptide and has a second aromatic residue (F, Y or W) nearby. Aromatic at
+position 3&ndash;4 is the strong case, matching F4 of met-enkephalin and F3 of
+&beta;-casomorphin-7; aromatic at 5&ndash;6 is the weaker case, which is what recovers
+YPVEPF and both lactoferroxins. <b>Enk score</b> compares the first five residues to
+YGGFM, scoring 2 per identity and 1 per conservative match, out of 10.</p>
+<p><b>What counts as evidence.</b> A peptide supports a site only when its N-terminus sits
+at that tyrosine. Peptides that merely span the tyrosine are reported separately in the
+project TSVs and do not count here, because a blocked N-terminus abolishes opioid binding.</p>
+<p><b>Coverage.</b> Goat and sheep sequences were scanned but have no peptide data in this
+set, so they are excluded from these figures. Humans do not express &beta;-lactoglobulin.
+Sheep lactoferrin is an unreviewed UniProt entry.</p>
+</footer>
+</div>
+
+<script>
+const DATA = [{"species":"human","protein":"beta-casein","accession":"P05814","mature_len":211,"sites":[{"pos":17,"win":"YKQKVEKV","cls":"none","enk":0,"n":11,"short":0,"known":""},{"pos":41,"win":"YPSFQPQP","cls":"casomorphin-like","enk":6,"n":5,"short":0,"known":""},{"pos":51,"win":"YPFVEPIP","cls":"casomorphin-like","enk":3,"n":5,"short":1,"known":"human beta-casomorphin-7"},{"pos":59,"win":"YGFLPQNI","cls":"enkephalin-like","enk":4,"n":0,"short":0,"known":""},{"pos":94,"win":"YTKGRVMP","cls":"none","enk":0,"n":10,"short":0,"known":""},{"pos":171,"win":"YPQRAVPV","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":196,"win":"YPVTQPLA","cls":"none","enk":0,"n":5,"short":0,"known":""}]},{"species":"cow","protein":"beta-casein","accession":"P02666","mature_len":209,"sites":[{"pos":60,"win":"YPFPGPIP","cls":"casomorphin-like","enk":3,"n":3,"short":1,"known":"beta-casomorphin-7"},{"pos":114,"win":"YPVEPFTE","cls":"extended (aromatic 5-6)","enk":3,"n":3,"short":0,"known":"neocasomorphin"},{"pos":180,"win":"YPQRDMPI","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":193,"win":"YQEPVLGP","cls":"none","enk":0,"n":8,"short":0,"known":""}]},{"species":"human","protein":"kappa-casein","accession":"P07498","mature_len":162,"sites":[{"pos":19,"win":"YQKTAPYV","cls":"none","enk":0,"n":3,"short":0,"known":""},{"pos":25,"win":"YVPMYYVP","cls":"extended (aromatic 5-6)","enk":3,"n":0,"short":0,"known":""},{"pos":29,"win":"YYVPNSYP","cls":"none","enk":0,"n":2,"short":0,"known":""},{"pos":30,"win":"YVPNSYPY","cls":"extended (aromatic 5-6)","enk":3,"n":7,"short":1,"known":""},{"pos":35,"win":"YPYYGTNL","cls":"casomorphin-like","enk":4,"n":0,"short":0,"known":"casoxin A/B"},{"pos":37,"win":"YYGTNLYQ","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":38,"win":"YGTNLYQR","cls":"extended (aromatic 5-6)","enk":5,"n":1,"short":1,"known":""},{"pos":43,"win":"YQRRPAIA","cls":"none","enk":0,"n":14,"short":1,"known":""},{"pos":55,"win":"YVPRTYYA","cls":"extended (aromatic 5-6)","enk":3,"n":0,"short":0,"known":""},{"pos":60,"win":"YYANPAVV","cls":"none","enk":0,"n":6,"short":0,"known":""},{"pos":61,"win":"YANPAVVR","cls":"none","enk":0,"n":19,"short":0,"known":""},{"pos":78,"win":"YLPNSHPP","cls":"none","enk":0,"n":5,"short":0,"known":""}]},{"species":"cow","protein":"kappa-casein","accession":"P02668","mature_len":169,"sites":[{"pos":25,"win":"YIPIQYVL","cls":"extended (aromatic 5-6)","enk":3,"n":0,"short":0,"known":""},{"pos":30,"win":"YVLSRYPS","cls":"extended (aromatic 5-6)","enk":2,"n":0,"short":0,"known":""},{"pos":35,"win":"YPSYGLNY","cls":"casomorphin-like","enk":5,"n":0,"short":0,"known":"casoxin C"},{"pos":38,"win":"YGLNYYQQ","cls":"extended (aromatic 5-6)","enk":4,"n":0,"short":0,"known":""},{"pos":42,"win":"YYQQKPVA","cls":"none","enk":0,"n":2,"short":0,"known":""},{"pos":43,"win":"YQQKPVAL","cls":"none","enk":0,"n":2,"short":2,"known":""},{"pos":58,"win":"YPYYAKPA","cls":"casomorphin-like","enk":4,"n":0,"short":0,"known":"casoxin A/B"},{"pos":60,"win":"YYAKPAAV","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":61,"win":"YAKPAAVR","cls":"none","enk":0,"n":0,"short":0,"known":""}]},{"species":"cow","protein":"beta-lactoglobulin","accession":"P02754","mature_len":162,"sites":[{"pos":20,"win":"YSLAMAAS","cls":"none","enk":0,"n":2,"short":0,"known":""},{"pos":42,"win":"YVEELKPT","cls":"none","enk":0,"n":9,"short":1,"known":""},{"pos":99,"win":"YKKYLLFC","cls":"other Y+aromatic","enk":4,"n":0,"short":0,"known":""},{"pos":102,"win":"YLLFCMEN","cls":"enkephalin-like","enk":4,"n":0,"short":0,"known":"beta-lactorphin"}]},{"species":"human","protein":"alpha-lactalbumin","accession":"P00709","mature_len":123,"sites":[{"pos":18,"win":"YGGIALPE","cls":"none","enk":0,"n":2,"short":1,"known":""},{"pos":36,"win":"YDTQAIVE","cls":"none","enk":0,"n":2,"short":0,"known":""},{"pos":50,"win":"YGLFQISN","cls":"enkephalin-like","enk":6,"n":2,"short":0,"known":"alpha-lactorphin"},{"pos":103,"win":"YWLAHKAL","cls":"none","enk":0,"n":0,"short":0,"known":""}]},{"species":"cow","protein":"alpha-lactalbumin","accession":"P00711","mature_len":123,"sites":[{"pos":18,"win":"YGGVSLPE","cls":"none","enk":0,"n":1,"short":0,"known":""},{"pos":36,"win":"YDTQAIVQ","cls":"none","enk":0,"n":1,"short":0,"known":""},{"pos":50,"win":"YGLFQINN","cls":"enkephalin-like","enk":6,"n":0,"short":0,"known":"alpha-lactorphin"},{"pos":103,"win":"YWLAHKAL","cls":"none","enk":0,"n":0,"short":0,"known":""}]},{"species":"human","protein":"lactoferrin","accession":"P02788","mature_len":691,"sites":[{"pos":65,"win":"YEAGLAPY","cls":"none","enk":0,"n":6,"short":0,"known":""},{"pos":72,"win":"YKLRPVAA","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":82,"win":"YGTERQPR","cls":"none","enk":0,"n":2,"short":0,"known":""},{"pos":92,"win":"YYAVAVVK","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":93,"win":"YAVAVVKK","cls":"none","enk":0,"n":5,"short":1,"known":""},{"pos":189,"win":"YFSYSGAF","cls":"other Y+aromatic","enk":4,"n":0,"short":0,"known":""},{"pos":192,"win":"YSGAFKCL","cls":"extended (aromatic 5-6)","enk":6,"n":0,"short":0,"known":""},{"pos":227,"win":"YELLCPDN","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":319,"win":"YLGSGYFT","cls":"extended (aromatic 5-6)","enk":4,"n":1,"short":0,"known":"lactoferroxin A"},{"pos":324,"win":"YFTAIQNL","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":398,"win":"YVYTAGKC","cls":"enkephalin-like","enk":2,"n":0,"short":0,"known":""},{"pos":400,"win":"YTAGKCGL","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":415,"win":"YKSQQSSD","cls":"none","enk":0,"n":2,"short":1,"known":""},{"pos":435,"win":"YLAVAVVR","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":488,"win":"YFSQSCAP","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":525,"win":"YYGYTGAF","cls":"other Y+aromatic","enk":5,"n":0,"short":0,"known":""},{"pos":526,"win":"YGYTGAFR","cls":"enkephalin-like","enk":4,"n":0,"short":0,"known":""},{"pos":528,"win":"YTGAFRCL","cls":"extended (aromatic 5-6)","enk":5,"n":0,"short":0,"known":""},{"pos":659,"win":"YEKYLGPQ","cls":"other Y+aromatic","enk":4,"n":2,"short":1,"known":""},{"pos":662,"win":"YLGPQYVA","cls":"extended (aromatic 5-6)","enk":4,"n":4,"short":0,"known":""},{"pos":667,"win":"YVAGITNL","cls":"none","enk":0,"n":0,"short":0,"known":""}]},{"species":"cow","protein":"lactoferrin","accession":"P24627","mature_len":689,"sites":[{"pos":72,"win":"YKLRPVAA","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":82,"win":"YGTKESPQ","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":92,"win":"YYAVAVVK","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":93,"win":"YAVAVVKK","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":135,"win":"YLSWTESL","cls":"enkephalin-like","enk":4,"n":0,"short":0,"known":""},{"pos":166,"win":"YPNLCQLC","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":189,"win":"YFGYSGAF","cls":"other Y+aromatic","enk":5,"n":0,"short":0,"known":""},{"pos":192,"win":"YSGAFKCL","cls":"extended (aromatic 5-6)","enk":6,"n":0,"short":0,"known":""},{"pos":227,"win":"YELLCLNN","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":319,"win":"YLGSRYLT","cls":"extended (aromatic 5-6)","enk":4,"n":2,"short":0,"known":"lactoferroxin (cow)"},{"pos":324,"win":"YLTTLKNL","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":342,"win":"YTRVVWCA","cls":"extended (aromatic 5-6)","enk":3,"n":0,"short":0,"known":""},{"pos":398,"win":"YIYTAGKC","cls":"enkephalin-like","enk":2,"n":0,"short":0,"known":""},{"pos":400,"win":"YTAGKCGL","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":433,"win":"YLAVAVVK","cls":"none","enk":0,"n":0,"short":0,"known":""},{"pos":523,"win":"YYGYTGAF","cls":"other Y+aromatic","enk":5,"n":0,"short":0,"known":""},{"pos":524,"win":"YGYTGAFR","cls":"enkephalin-like","enk":4,"n":0,"short":0,"known":""},{"pos":526,"win":"YTGAFRCL","cls":"extended (aromatic 5-6)","enk":5,"n":0,"short":0,"known":""},{"pos":657,"win":"YEEYLGTE","cls":"other Y+aromatic","enk":4,"n":0,"short":0,"known":""},{"pos":660,"win":"YLGTEYVT","cls":"extended (aromatic 5-6)","enk":4,"n":0,"short":0,"known":""},{"pos":665,"win":"YVTAIANL","cls":"none","enk":0,"n":0,"short":0,"known":""}]}];
+const CLS = {"casomorphin-like":["cas","Casomorphin-like","p-cas"],
+ "enkephalin-like":["enk","Enkephalin-like","p-enk"],
+ "extended (aromatic 5-6)":["weak","Aromatic 5\u20136","p-weak"],
+ "other Y+aromatic":["weak","Aromatic 5\u20136","p-weak"],
+ "none":["null","No 2nd aromatic","p-none"]};
+const col = c => "var(--" + (CLS[c]||CLS.none)[0] + ")";
+const nm  = c => (CLS[c]||CLS.none)[1];
+const pil = c => (CLS[c]||CLS.none)[2];
+const SPN = {human:"Human", cow:"Bovine"};
+const PN  = {"beta-casein":"\u03b2-casein","kappa-casein":"\u03ba-casein",
+ "beta-lactoglobulin":"\u03b2-lactoglobulin","alpha-lactalbumin":"\u03b1-lactalbumin",
+ "lactoferrin":"Lactoferrin"};
+
+const MAXN = Math.max(...DATA.flatMap(t => t.sites.map(s => s.n)));
+const tip = document.createElement("div"); tip.id = "tip"; document.body.appendChild(tip);
+
+function track(t){
+  const W = 1000, H = 108, L = 8, R = 8, base = H - 26, top = 16;
+  const x = p => L + (p / t.mature_len) * (W - L - R);
+  const y = n => base - (n ? (14 + (n / MAXN) * (base - top - 14)) : 5);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${SPN[t.species]} ${t.protein} tyrosine map">`;
+  s += `<line class="axis" x1="${L}" y1="${base}" x2="${W-R}" y2="${base}"/>`;
+  const step = t.mature_len > 400 ? 100 : 50;
+  for (let p = 0; p <= t.mature_len; p += step)
+    s += `<line class="axis" x1="${x(p)}" y1="${base}" x2="${x(p)}" y2="${base+4}"/>` +
+         `<text class="tick" x="${x(p)}" y="${base+15}" text-anchor="middle">${p||1}</text>`;
+  for (const st of t.sites){
+    const c = col(st.cls), X = x(st.pos), Y = y(st.n);
+    s += `<g class="hit" data-t='${JSON.stringify({...st, sp:t.species, pr:t.protein}).replace(/'/g,"&apos;")}'>`;
+    s += `<line class="stem" x1="${X}" y1="${base}" x2="${X}" y2="${Y}" stroke="${c}"/>`;
+    if (st.known) s += `<circle cx="${X}" cy="${Y}" r="6.5" fill="none" stroke="var(--known)" stroke-width="2"/>`;
+    s += `<circle class="dot" cx="${X}" cy="${Y}" r="4" fill="${c}"/>`;
+    s += `<rect x="${X-7}" y="${Math.min(Y,base)-8}" width="14" height="${Math.abs(base-Y)+16}" fill="transparent"/></g>`;
+    if (st.known || st.n >= 5)
+      s += `<text class="lbl${st.known?" k":""}" x="${X}" y="${Y-11}" text-anchor="middle">${st.win.slice(0,st.known?7:6)}</text>`;
+  }
+  return s + "</svg>";
+}
+
+document.getElementById("tracks").innerHTML = DATA.map(t => `
+  <div class="track">
+    <div class="thead">
+      <span class="tname">${SPN[t.species]} ${PN[t.protein]} <em>&middot; ${t.sites.length} Tyr</em></span>
+      <span class="tacc">${t.accession} &middot; ${t.mature_len} aa mature</span>
+    </div>${track(t)}
+  </div>`).join("");
+
+document.addEventListener("pointerover", e => {
+  const g = e.target.closest(".hit"); if (!g) return;
+  const d = JSON.parse(g.dataset.t);
+  tip.innerHTML = `<b>${d.win}</b>` +
+    `<i>${SPN[d.sp]} ${PN[d.pr]} &middot; Tyr ${d.pos} (mature)</i>` +
+    `<i>${nm(d.cls)} &middot; enk score ${d.enk}/10</i>` +
+    `<i>${d.n ? d.n + " peptide" + (d.n>1?"s":"") + " start here" + (d.short ? ", " + d.short + " as a 4\u20138mer" : "") : "never seen as an N-terminus"}</i>` +
+    (d.known ? `<i style="color:var(--ink)"><b style="display:inline;font-size:11.5px">${d.known}</b></i>` : "");
+  tip.style.opacity = 1;
+});
+document.addEventListener("pointerout", e => { if (e.target.closest(".hit")) tip.style.opacity = 0; });
+document.addEventListener("pointermove", e => {
+  const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.min(e.clientX + pad, innerWidth - w - 8) + "px";
+  tip.style.top  = Math.max(8, e.clientY - h - pad) + "px";
+});
+
+const ROWS = DATA.flatMap(t => t.sites.map(s => ({
+  species: SPN[t.species], protein: PN[t.protein], pos: s.pos, win: s.win,
+  cls: s.cls, enk: s.enk, n: s.n, short: s.short, known: s.known })));
+
+function opts(sel, vals, all){
+  sel.innerHTML = `<option value="">${all}</option>` +
+    [...new Set(vals)].map(v => `<option>${v}</option>`).join("");
+}
+const fProt = fId("fProt"), fSp = fId("fSp"), fCls = fId("fCls"),
+      fRel = fId("fRel"), fNov = fId("fNov");
+function fId(i){ return document.getElementById(i); }
+opts(fProt, ROWS.map(r => r.protein), "All proteins");
+opts(fSp, ROWS.map(r => r.species), "Both");
+fCls.innerHTML = `<option value="">Any motif</option>` +
+  ["casomorphin-like","enkephalin-like","extended (aromatic 5-6)","none"]
+    .map(c => `<option value="${c}">${nm(c)}</option>`).join("");
+
+let sortK = "n", sortD = -1;
+function render(){
+  let r = ROWS.filter(x =>
+    (!fProt.value || x.protein === fProt.value) &&
+    (!fSp.value   || x.species === fSp.value) &&
+    (!fCls.value  || x.cls === fCls.value ||
+      (fCls.value === "extended (aromatic 5-6)" && x.cls === "other Y+aromatic")) &&
+    (!fRel.checked || x.n > 0) && (!fNov.checked || !x.known));
+  r.sort((a, b) => {
+    const A = a[sortK], B = b[sortK];
+    return (typeof A === "number" ? A - B : String(A).localeCompare(String(B))) * sortD;
+  });
+  document.querySelector("#tbl tbody").innerHTML = r.map(x => `<tr>
+    <td>${x.species}</td><td>${x.protein}</td><td class="num">${x.pos}</td>
+    <td class="seq">${x.win}</td>
+    <td><span class="pill ${pil(x.cls)}">${nm(x.cls)}</span></td>
+    <td class="num">${x.enk}</td><td class="num">${x.n || "\u2014"}</td>
+    <td class="num">${x.short || "\u2014"}</td>
+    <td class="tag${x.known ? " hit" : ""}">${x.known || "\u2014"}</td></tr>`).join("")
+    || `<tr><td colspan="9" style="color:var(--ink-3)">No sites match these filters.</td></tr>`;
+}
+document.querySelectorAll("#tbl th").forEach(th => th.onclick = () => {
+  const k = th.dataset.k;
+  sortD = (k === sortK) ? -sortD : (typeof ROWS[0][k] === "number" ? -1 : 1);
+  sortK = k; render();
+});
+[fProt, fSp, fCls, fRel, fNov].forEach(el => el.onchange = render);
+render();
+</script>
+
+</body></html>
